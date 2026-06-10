@@ -48,7 +48,7 @@ public class DemoMemberDataInitializer implements CommandLineRunner {
 				.orElseGet(() -> userRepository.save(new AppUser("王柏翔", DEMO_PHONE, passwordHasher.hash(DEMO_PASSWORD), birthday)));
 		Team team = teamRepository.findByName("Hoopers apex")
 				.orElseThrow(() -> new IllegalStateException("Demo team is missing"));
-		if (memberRepository.findByUserId(member.getId()).isEmpty()) {
+		if (memberRepository.findFirstByUserIdOrderByIdAsc(member.getId()).isEmpty()) {
 			team.addMember(member.getName(), birthday, member.getId());
 			teamRepository.save(team);
 		}

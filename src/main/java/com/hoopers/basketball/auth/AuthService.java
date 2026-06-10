@@ -22,7 +22,7 @@ import com.hoopers.basketball.auth.AuthDtos.LoginRequest;
 import com.hoopers.basketball.auth.AuthDtos.RegisterRequest;
 import com.hoopers.basketball.auth.AuthDtos.SendSmsRequest;
 import com.hoopers.basketball.auth.AuthDtos.SendSmsResponse;
-import com.hoopers.basketball.league.TeamMemberRepository;
+import com.hoopers.basketball.league.TeamMemberLinkService;
 
 @Service
 public class AuthService {
@@ -33,7 +33,7 @@ public class AuthService {
 	private final AppUserRepository userRepository;
 	private final SmsVerificationRepository verificationRepository;
 	private final PasswordHasher passwordHasher;
-	private final TeamMemberRepository memberRepository;
+	private final TeamMemberLinkService memberLinkService;
 	private final UserRoleRepository roleRepository;
 	private final Map<UUID, CaptchaChallenge> captchas = new ConcurrentHashMap<>();
 	private final Map<String, Long> sessions = new ConcurrentHashMap<>();
@@ -43,13 +43,13 @@ public class AuthService {
 			AppUserRepository userRepository,
 			SmsVerificationRepository verificationRepository,
 			PasswordHasher passwordHasher,
-			TeamMemberRepository memberRepository,
+			TeamMemberLinkService memberLinkService,
 			UserRoleRepository roleRepository,
 			@Value("${app.sms.development-mode:true}") boolean developmentMode) {
 		this.userRepository = userRepository;
 		this.verificationRepository = verificationRepository;
 		this.passwordHasher = passwordHasher;
-		this.memberRepository = memberRepository;
+		this.memberLinkService = memberLinkService;
 		this.roleRepository = roleRepository;
 		this.developmentMode = developmentMode;
 	}
@@ -88,13 +88,12 @@ public class AuthService {
 			throw new AuthException(HttpStatus.BAD_REQUEST, "簡訊驗證碼錯誤或已過期");
 		}
 		verification.markUsed();
-		AppUser user = userRepository.save(new AppUser(request.name(), phone, passwordHasher.hash(request.password()), request.birthday(), role));
+		AppUser user = userRepository.save(new AppUser(request.name().trim(), phone, passwordHasher.hash(request.password()), request.birthday(), role));
 		grantRole(user.getId(), AppUser.Role.MEMBER);
 		if (role == AppUser.Role.COACH) {
 			grantRole(user.getId(), AppUser.Role.COACH);
 		}
-		memberRepository.findAllByNameAndBirthday(user.getName(), user.getBirthday())
-				.forEach(member -> member.linkUser(user.getId()));
+		memberLinkService.syncUser(user.getId(), user.getName(), user.getBirthday());
 		return responseFor(user);
 	}
 

@@ -45,6 +45,8 @@ C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\league\Sche
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\league\SchedulePlayerStats.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\league\Team.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\league\TeamMember.java
+C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\league\TeamMemberLinkConstraintMigrator.java
+C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\league\TeamMemberLinkService.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\league\TeamMemberRepository.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\league\TeamRepository.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\notification\Notification.java

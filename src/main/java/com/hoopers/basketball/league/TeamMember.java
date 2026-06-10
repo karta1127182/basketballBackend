@@ -48,5 +48,5 @@ public class TeamMember {
 	public LocalDate getBirthday() { return birthday; }
 	public Long getUserId() { return userId; }
 	public void linkUser(Long userId) { this.userId = userId; }
-	public boolean matches(String otherName, LocalDate otherBirthday) { return name.equals(otherName) && birthday.equals(otherBirthday); }
+	public boolean matches(String otherName, LocalDate otherBirthday) { return name.equals(otherName.trim()) && birthday.equals(otherBirthday); }
 }

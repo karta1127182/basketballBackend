@@ -24,12 +24,14 @@ public class LeagueService {
 	private final LeagueScheduleRepository scheduleRepository;
 	private final com.hoopers.basketball.auth.AppUserRepository userRepository;
 	private final NotificationService notificationService;
+	private final TeamMemberLinkService memberLinkService;
 
-	public LeagueService(TeamRepository teamRepository, LeagueScheduleRepository scheduleRepository, com.hoopers.basketball.auth.AppUserRepository userRepository, NotificationService notificationService) {
+	public LeagueService(TeamRepository teamRepository, LeagueScheduleRepository scheduleRepository, com.hoopers.basketball.auth.AppUserRepository userRepository, NotificationService notificationService, TeamMemberLinkService memberLinkService) {
 		this.teamRepository = teamRepository;
 		this.scheduleRepository = scheduleRepository;
 		this.userRepository = userRepository;
 		this.notificationService = notificationService;
+		this.memberLinkService = memberLinkService;
 	}
 
 	@Transactional(readOnly = true)
@@ -56,7 +58,16 @@ public class LeagueService {
 	public TeamResponse addMember(Long id, MemberRequest request) {
 		Team team = findTeam(id);
 		Long userId = findMemberId(request);
-		team.addMember(request.name().trim(), request.birthday(), userId);
+		String name = request.name().trim();
+		if (userId != null) {
+			memberLinkService.findOtherTeamLink(userId, team.getId()).ifPresent(member -> {
+				throw new ResponseStatusException(HttpStatus.CONFLICT, "此球員已綁定其他球隊，不能重複綁定。");
+			});
+		}
+		team.addMember(name, request.birthday(), userId);
+		if (userId != null) {
+			memberLinkService.syncUser(userId, name, request.birthday());
+		}
 		return toResponse(team);
 	}
 

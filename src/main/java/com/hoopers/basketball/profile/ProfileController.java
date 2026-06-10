@@ -102,7 +102,7 @@ public class ProfileController {
 	}
 
 	private TeamMember findMember(AppUser user) {
-		return memberRepository.findByUserId(user.getId())
+		return memberRepository.findFirstByUserIdOrderByIdAsc(user.getId())
 				.orElseGet(() -> memberRepository.findAllByNameAndBirthday(user.getName(), user.getBirthday()).stream()
 						.findFirst()
 						.orElse(null));

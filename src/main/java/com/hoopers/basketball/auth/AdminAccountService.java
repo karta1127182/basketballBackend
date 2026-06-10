@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.hoopers.basketball.auth.AdminAccountDtos.AccountResponse;
 import com.hoopers.basketball.auth.AdminAccountDtos.UpdateAccountRequest;
+import com.hoopers.basketball.league.TeamMemberLinkService;
 
 @Service
 public class AdminAccountService {
@@ -18,11 +19,13 @@ public class AdminAccountService {
 	private final AppUserRepository userRepository;
 	private final PasswordHasher passwordHasher;
 	private final UserRoleRepository roleRepository;
+	private final TeamMemberLinkService memberLinkService;
 
-	public AdminAccountService(AppUserRepository userRepository, PasswordHasher passwordHasher, UserRoleRepository roleRepository) {
+	public AdminAccountService(AppUserRepository userRepository, PasswordHasher passwordHasher, UserRoleRepository roleRepository, TeamMemberLinkService memberLinkService) {
 		this.userRepository = userRepository;
 		this.passwordHasher = passwordHasher;
 		this.roleRepository = roleRepository;
+		this.memberLinkService = memberLinkService;
 	}
 
 	@Transactional(readOnly = true)
@@ -55,6 +58,7 @@ public class AdminAccountService {
 				: passwordHasher.hash(request.password());
 		user.updateAccount(request.name().trim(), phone, request.birthday(), primaryRole(nextRoles), passwordHash);
 		syncRoles(user.getId(), nextRoles);
+		memberLinkService.syncUser(user.getId(), user.getName(), user.getBirthday());
 		return toResponse(user);
 	}
 
