@@ -108,6 +108,7 @@ public class CoachProfileService {
 				coach.getName(),
 				profile.getBio(),
 				profile.getSpecialties(),
+				profile.getPhotoUrl(),
 				courses.size(),
 				registrations.size(),
 				paidCount,
@@ -124,7 +125,7 @@ public class CoachProfileService {
 	public CoachProfileResponse updateMyProfile(AppUser coach, CoachProfileRequest request) {
 		CoachProfile profile = profileRepository.findByUserId(coach.getId())
 				.orElseGet(() -> profileRepository.save(new CoachProfile(coach.getId())));
-		profile.update(request.bio(), request.specialties());
+		profile.update(request.bio(), request.specialties(), request.photoUrl());
 		return profileFor(coach.getId());
 	}
 

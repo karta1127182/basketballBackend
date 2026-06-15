@@ -26,6 +26,9 @@ public class CoachProfile {
 	@Column(nullable = false, length = 300)
 	private String specialties;
 
+	@Column(length = 2000)
+	private String photoUrl;
+
 	@Column(nullable = false)
 	private Instant updatedAt;
 
@@ -36,6 +39,7 @@ public class CoachProfile {
 		this.userId = userId;
 		this.bio = "";
 		this.specialties = "";
+		this.photoUrl = "";
 		this.updatedAt = Instant.now();
 	}
 
@@ -45,11 +49,14 @@ public class CoachProfile {
 
 	public String getSpecialties() { return specialties; }
 
+	public String getPhotoUrl() { return photoUrl; }
+
 	public Instant getUpdatedAt() { return updatedAt; }
 
-	public void update(String bio, String specialties) {
+	public void update(String bio, String specialties, String photoUrl) {
 		this.bio = bio == null ? "" : bio.trim();
 		this.specialties = specialties == null ? "" : specialties.trim();
+		this.photoUrl = photoUrl == null ? "" : photoUrl.trim();
 		this.updatedAt = Instant.now();
 	}
 }

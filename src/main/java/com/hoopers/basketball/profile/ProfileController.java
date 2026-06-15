@@ -7,20 +7,30 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hoopers.basketball.auth.AuthService;
 import com.hoopers.basketball.auth.AppUser;
+import com.hoopers.basketball.course.Course;
+import com.hoopers.basketball.course.CourseRegistration;
+import com.hoopers.basketball.course.CourseRegistrationRepository;
+import com.hoopers.basketball.course.CourseRepository;
 import com.hoopers.basketball.league.LeagueSchedule;
 import com.hoopers.basketball.league.LeagueScheduleRepository;
 import com.hoopers.basketball.league.SchedulePlayerStats;
 import com.hoopers.basketball.league.TeamMember;
 import com.hoopers.basketball.league.TeamMemberRepository;
+import com.hoopers.basketball.profile.ProfileDtos.CourseSeriesResponse;
 import com.hoopers.basketball.profile.ProfileDtos.PlayerDashboardResponse;
+import com.hoopers.basketball.profile.ProfileDtos.PlayerProfileRequest;
 import com.hoopers.basketball.profile.ProfileDtos.RecentScheduleResponse;
 import com.hoopers.basketball.profile.ProfileDtos.PlayerStatsResponse;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -30,16 +40,22 @@ public class ProfileController {
 	private final PlayerStatsRepository statsRepository;
 	private final TeamMemberRepository memberRepository;
 	private final LeagueScheduleRepository scheduleRepository;
+	private final CourseRegistrationRepository courseRegistrationRepository;
+	private final CourseRepository courseRepository;
 
 	public ProfileController(
 			AuthService authService,
 			PlayerStatsRepository statsRepository,
 			TeamMemberRepository memberRepository,
-			LeagueScheduleRepository scheduleRepository) {
+			LeagueScheduleRepository scheduleRepository,
+			CourseRegistrationRepository courseRegistrationRepository,
+			CourseRepository courseRepository) {
 		this.authService = authService;
 		this.statsRepository = statsRepository;
 		this.memberRepository = memberRepository;
 		this.scheduleRepository = scheduleRepository;
+		this.courseRegistrationRepository = courseRegistrationRepository;
+		this.courseRepository = courseRepository;
 	}
 
 	@GetMapping("/stats")
@@ -49,11 +65,28 @@ public class ProfileController {
 		return ResponseEntity.ok(playerStats(user));
 	}
 
+	@PutMapping("/player")
+	@Transactional
+	public ResponseEntity<PlayerStatsResponse> updatePlayerProfile(
+			@RequestHeader("X-Auth-Token") String token,
+			@Valid @RequestBody PlayerProfileRequest request) {
+		AppUser user = authService.requireUser(token);
+		PlayerStats stats = statsRepository.findByUserId(user.getId())
+				.orElseGet(() -> statsRepository.save(new PlayerStats(
+						user.getId(), 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+						request.heightCm(), request.weightKg(), request.position())));
+		stats.updateProfile(request.heightCm(), request.weightKg(), request.position(), request.photoUrl());
+		return ResponseEntity.ok(playerStats(user));
+	}
+
 	@GetMapping("/dashboard")
 	@Transactional(readOnly = true)
 	public ResponseEntity<PlayerDashboardResponse> dashboard(@RequestHeader("X-Auth-Token") String token) {
 		AppUser user = authService.requireUser(token);
 		TeamMember member = findMember(user);
+		boolean isPlayer = member != null;
+		boolean isCoach = authService.hasRole(user, AppUser.Role.COACH) || authService.hasRole(user, AppUser.Role.ADMIN);
+		String profileType = isPlayer ? "PLAYER" : isCoach ? "COACH" : "STUDENT";
 		String teamName = member == null ? null : member.getTeam().getName();
 		Long teamId = member == null ? null : member.getTeam().getId();
 		List<RecentScheduleResponse> schedules = teamId == null ? List.of() : scheduleRepository.findAll().stream()
@@ -66,7 +99,55 @@ public class ProfileController {
 						schedule.getHomeTeam().getName(), schedule.getAwayTeam().getName(),
 						schedule.getStatus().name(), schedule.getScore()))
 				.toList();
-		return ResponseEntity.ok(new PlayerDashboardResponse(teamName, playerStats(user), schedules));
+		return ResponseEntity.ok(new PlayerDashboardResponse(
+				profileType,
+				teamName,
+				isPlayer ? playerStats(user) : null,
+				schedules,
+				courseSeries(user, isCoach)));
+	}
+
+	private List<CourseSeriesResponse> courseSeries(AppUser user, boolean isCoach) {
+		if (isCoach) {
+			return courseRepository.findAllByCoachUserIdOrderByCreatedAtDesc(user.getId()).stream()
+					.map(this::toCourseSeries)
+					.toList();
+		}
+		return courseRegistrationRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId()).stream()
+				.map(this::toCourseSeries)
+				.toList();
+	}
+
+	private CourseSeriesResponse toCourseSeries(Course course) {
+		return new CourseSeriesResponse(
+				null,
+				course.getId(),
+				course.getTitle(),
+				course.getCoachName(),
+				course.getTimeText(),
+				course.getLocation(),
+				course.getLevel(),
+				course.getStatus(),
+				false,
+				course.getCapacity(),
+				courseRegistrationRepository.countByCourseId(course.getId()),
+				course.getPrice());
+	}
+
+	private CourseSeriesResponse toCourseSeries(CourseRegistration registration) {
+		return new CourseSeriesResponse(
+				registration.getId(),
+				registration.getCourse().getId(),
+				registration.getCourse().getTitle(),
+				registration.getCourse().getCoachName(),
+				registration.getCourse().getTimeText(),
+				registration.getCourse().getLocation(),
+				registration.getCourse().getLevel(),
+				registration.getPaymentStatus(),
+				registration.isCheckedIn(),
+				registration.getCourse().getCapacity(),
+				courseRegistrationRepository.countByCourseId(registration.getCourse().getId()),
+				registration.getCourse().getPrice());
 	}
 
 	private PlayerStatsResponse playerStats(AppUser user) {
@@ -98,7 +179,8 @@ public class ProfileController {
 				average(games.stream().mapToInt(stats -> value(stats.getBlocks())).sum(), gamesPlayed),
 				bio == null ? 0 : value(bio.getHeightCm()),
 				bio == null ? 0 : value(bio.getWeightKg()),
-				bio == null || bio.getPosition() == null ? "未設定" : bio.getPosition());
+				bio == null || bio.getPosition() == null ? "未設定" : bio.getPosition(),
+				bio == null ? "" : bio.getPhotoUrl());
 	}
 
 	private TeamMember findMember(AppUser user) {

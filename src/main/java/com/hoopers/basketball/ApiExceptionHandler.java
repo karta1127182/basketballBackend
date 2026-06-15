@@ -9,6 +9,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.hoopers.basketball.player.PlayerNotFoundException;
@@ -90,6 +92,16 @@ public class ApiExceptionHandler {
 		return ResponseEntity.badRequest().body(Map.of(
 				"message", "欄位資料驗證失敗",
 				"errors", errors));
+	}
+
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	public ResponseEntity<Map<String, String>> handleMaxUploadSize(MaxUploadSizeExceededException exception) {
+		return ResponseEntity.badRequest().body(Map.of("message", "照片不可超過 5MB"));
+	}
+
+	@ExceptionHandler(MultipartException.class)
+	public ResponseEntity<Map<String, String>> handleMultipart(MultipartException exception) {
+		return ResponseEntity.badRequest().body(Map.of("message", "照片上傳格式不正確，請重新選擇照片"));
 	}
 
 	@ExceptionHandler(Exception.class)

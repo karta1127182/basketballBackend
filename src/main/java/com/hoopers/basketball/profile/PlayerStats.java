@@ -33,6 +33,9 @@ public class PlayerStats {
 	@Column(length = 20)
 	private String position;
 
+	@Column(length = 2000)
+	private String photoUrl;
+
 	protected PlayerStats() {
 	}
 
@@ -78,4 +81,12 @@ public class PlayerStats {
 	public Integer getHeightCm() { return heightCm; }
 	public Integer getWeightKg() { return weightKg; }
 	public String getPosition() { return position; }
+	public String getPhotoUrl() { return photoUrl; }
+
+	public void updateProfile(Integer heightCm, Integer weightKg, String position, String photoUrl) {
+		this.heightCm = heightCm;
+		this.weightKg = weightKg;
+		this.position = position == null ? "" : position.trim();
+		this.photoUrl = photoUrl == null ? "" : photoUrl.trim();
+	}
 }

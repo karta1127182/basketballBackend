@@ -11,8 +11,9 @@ public final class CoachDtos {
 	}
 
 	public record CoachProfileRequest(
-			@Size(max = 500, message = "教練介紹最多 500 個字") String bio,
-			@Size(max = 300, message = "專長最多 300 個字") String specialties) {
+			@Size(max = 500, message = "教練介紹最多 500 字") String bio,
+			@Size(max = 300, message = "專長最多 300 字") String specialties,
+			@Size(max = 2000, message = "照片網址最多 2000 字") String photoUrl) {
 	}
 
 	public record CoachProfileResponse(
@@ -20,6 +21,7 @@ public final class CoachDtos {
 			String name,
 			String bio,
 			String specialties,
+			String photoUrl,
 			long courseCount,
 			long registrationCount,
 			long paidCount,

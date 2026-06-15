@@ -69,6 +69,7 @@ C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\profile\Pla
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\profile\PlayerStatsRepository.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\profile\ProfileController.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\profile\ProfileDtos.java
+C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\profile\ProfilePhotoController.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\stats\StatsController.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\stats\StatsDtos.java
 C:\Workspace\basketball\backend\src\main\java\com\hoopers\basketball\stats\StatsService.java

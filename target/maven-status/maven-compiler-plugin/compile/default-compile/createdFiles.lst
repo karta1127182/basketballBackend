@@ -57,6 +57,7 @@ com\hoopers\basketball\stats\StatsDtos$PlayerRankResponse.class
 com\hoopers\basketball\course\CourseDtos.class
 com\hoopers\basketball\league\LeagueDtos$MemberResponse.class
 com\hoopers\basketball\auth\RoleConstraintMigrator.class
+com\hoopers\basketball\profile\ProfileDtos$CourseSeriesResponse.class
 com\hoopers\basketball\league\LeagueSchedule$Status.class
 com\hoopers\basketball\course\CourseReview.class
 com\hoopers\basketball\auth\AdminAccountInitializer.class
@@ -100,8 +101,11 @@ com\hoopers\basketball\auth\AuthDtos$RegisterRequest.class
 com\hoopers\basketball\video\VideoDtos$VideoRequest.class
 com\hoopers\basketball\video\VideoDtos.class
 com\hoopers\basketball\league\LeagueDtos$TeamRequest.class
+com\hoopers\basketball\league\TeamMemberLinkService.class
 com\hoopers\basketball\coach\CoachDtos$CoachReviewSummary.class
 com\hoopers\basketball\profile\ProfileDtos$PlayerDashboardResponse.class
+com\hoopers\basketball\league\TeamMemberLinkConstraintMigrator.class
+com\hoopers\basketball\profile\ProfileDtos$PlayerProfileRequest.class
 com\hoopers\basketball\notification\NotificationSettingRepository.class
 com\hoopers\basketball\coach\CoachDtos$CoachProfileRequest.class
 com\hoopers\basketball\league\LeagueService.class
@@ -116,7 +120,9 @@ com\hoopers\basketball\coach\CoachDtos$CoachCourseSummary.class
 com\hoopers\basketball\profile\ProfileDtos$PlayerStatsResponse.class
 com\hoopers\basketball\video\VideoDataInitializer.class
 com\hoopers\basketball\auth\UserRole.class
+com\hoopers\basketball\profile\ProfilePhotoController.class
 com\hoopers\basketball\course\CourseController.class
+com\hoopers\basketball\profile\ProfilePhotoController$PhotoUploadResponse.class
 com\hoopers\basketball\auth\AuthController.class
 com\hoopers\basketball\auth\AdminAccountController.class
 com\hoopers\basketball\course\CourseDtos$CourseOrderResponse.class
